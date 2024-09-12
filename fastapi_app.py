@@ -1,7 +1,7 @@
-
 # fastapi_app.py
 import time
 import json
+import csv
 import faiss
 import uvicorn
 import logging
@@ -26,41 +26,137 @@ app = FastAPI()
 
 # Add CORS middleware
 app.add_middleware(
-    CORSMiddleware, 
+    CORSMiddleware,
     allow_origins=["*"],  # Replace with your actual Vercel app URL
-    # allow_origins=["https://nyayalay.vercel.app/", "https://nyayalay-gm2xkbvrc-parthnarkhedes-projects.vercel.app/" ],  # Replace with your actual Vercel app URL
-    allow_credentials=True, 
-    allow_methods=["*"], 
-    allow_headers=["*"], 
+    # allow_origins=["https://nyayalay.vercel.app/", "https://nyayalay-gm2xkbvrc-parthnarkhedes-projects.vercel.app/" ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Function to load and process a PDF file
-def load_pdf(pdf_path):
-    reader = PdfReader(pdf_path)
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text()
-    return text
+# # Function to load and process a PDF file
+# def load_pdf(pdf_path):
+#     reader = PdfReader(pdf_path)
+#     text = ""
+#     for page in reader.pages:
+#         text += page.extract_text()
+#     return text
 
-# Load and split PDF into chunks
-def split_pdf_to_chunks(pdf_text, chunk_size=1000, chunk_overlap=200):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    chunks = text_splitter.split_text(pdf_text)
-    return chunks
+# # Load and split PDF into chunks
+# def split_pdf_to_chunks(pdf_text, chunk_size=1000, chunk_overlap=200):
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+#     chunks = text_splitter.split_text(pdf_text)
+#     return chunks
 
-# Load and process the PDF
-pdf_path = "/content/case_dataset.pdf"
-pdf_text = load_pdf(pdf_path)
-chunks = split_pdf_to_chunks(pdf_text)
+# # Load and process the PDF
+# pdf_path = "/content/case_dataset_abhishek.csv"
+# pdf_text = load_pdf(pdf_path)
+# chunks = split_pdf_to_chunks(pdf_text)
 
-# Initialize Sentence Transformer for embedding
+# # Initialize Sentence Transformer for embedding
+# embedder = SentenceTransformer('all-MiniLM-L6-v2')
+
+# # Create embeddings for the chunks
+# embeddings = embedder.encode(chunks)
+# np.save("/content/embeddings.npy", embeddings)
+# with open("/content/chunks.json", 'w') as f:
+#     json.dump(chunks, f)
+
+# JSON processing
+# def extract_text_from_json(json_path):
+#     with open(json_path, 'r', encoding='utf-8') as file:
+#         data = json.load(file)
+
+#         text = ""
+#         for entry in data:
+#             case_no = entry.get('Case No.', '')
+#             case_name = entry.get('Case Name', '')
+#             date = entry.get('Date', '')
+#             court = entry.get('Court', '')
+#             facts = entry.get('Facts', '')
+#             legal_issues = entry.get('Legal Issues', '')
+#             plaintiff_arguments = entry.get('Plaintiff\'s Arguments', '')
+#             defendant_arguments = entry.get('Defendant\'s Arguments', '')
+#             court_reasoning = entry.get('Court\'s Reasoning', '')
+#             decision = entry.get('Decision', '')
+#             conclusion = entry.get('Conclusion', '')
+#             case_summary = entry.get('Case Summary', '')
+
+#             # Concatenate relevant case information into a single text
+#             text += f"Case No: {case_no}\n"
+#             text += f"Case Name: {case_name}\n"
+#             text += f"Date: {date}\n"
+#             text += f"Court: {court}\n"
+#             text += f"Facts: {facts}\n"
+#             text += f"Legal Issues: {legal_issues}\n"
+#             text += f"Plaintiff's Arguments: {plaintiff_arguments}\n"
+#             text += f"Defendant's Arguments: {defendant_arguments}\n"
+#             text += f"Court's Reasoning: {court_reasoning}\n"
+#             text += f"Decision: {decision}\n"
+#             text += f"Conclusion: {conclusion}\n"
+#             text += f"Case Summary: {case_summary}\n\n"
+
+#     if not text.strip():
+#         print("No text found in JSON.")
+#     return text
+
+embeddings_path = "data/embeddings.npy"
+chunks_path = "data/chunks.json"
+# Load case dataset
+# with open("data/case_dataset.json", "r") as f:
+#     case_data = json.load(f)
+
+# # Load precomputed chunks
+# with open("data/chunks.json", "r") as f:
+#     chunks = json.load(f)
+
+# # Load embeddings
+# embeddings = np.load("data/embeddings.npy")
+# # Text chunking
+# def chunk_text(text, chunk_size=1000, overlap=200):
+#     if not text:
+#         logging.error("The input text for chunking is empty.")
+#         return []
+
+#     chunks = []
+#     start = 0
+#     while start < len(text):
+#         end = start + chunk_size
+#         chunk = text[start:end].strip()
+#         if chunk:
+#             chunks.append(chunk)
+#         start = end - overlap
+#     return chunks
+
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
+# Load and process the JSON file
+# json_path = "data/case_dataset_Abhishek.json"
+# json_text = extract_text_from_json(json_path)
+# chunks = chunk_text(json_text)
+
+# if not chunks:
+#     raise ValueError("Chunk list is empty, check the text splitting process.")
+
+# embeddings = embedder.encode(chunks)
+
+# if embeddings.size > 0:  # Check if embeddings contain any data
+#     # np.save("/content/embeddings.npy", embeddings)
+#     # print(f"Embeddings saved to {embeddings_path}")
+#     with open("data/chunks.json", 'w') as f:
+#       json.dump(chunks, f)
+# else:
+#     print("No embeddings to save.")
+
+
+
+# Initialize Sentence Transformer for embedding
+
 # Create embeddings for the chunks
-embeddings = embedder.encode(chunks)
-np.save("/content/embeddings.npy", embeddings)
-with open("/content/chunks.json", 'w') as f:
-    json.dump(chunks, f)
+# Log if any empty chunks were found
+# Save embeddings and chunks
+
+
 
 # Load precomputed embeddings and chunks
 def load_precomputed_data(embeddings_path, chunks_path):
@@ -70,8 +166,6 @@ def load_precomputed_data(embeddings_path, chunks_path):
     return embeddings, chunks
 
 # Load the precomputed embeddings and chunks
-embeddings_path = "/content/embeddings.npy"
-chunks_path = "/content/chunks.json"
 embeddings, chunks = load_precomputed_data(embeddings_path, chunks_path)
 
 # Vector store class
