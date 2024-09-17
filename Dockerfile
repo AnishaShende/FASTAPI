@@ -10,8 +10,14 @@ COPY . /app
 # Install any dependencies specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Update package list and install curl and bash
+RUN apt-get update && apt-get install -y curl bash
+
 # Give execute permission to the ollama_server.sh script
 RUN chmod +x /app/ollama_server.sh
 
-# Run the ollama server script and then start FastAPI app
-CMD ["/app/ollama_server.sh", "&&", "uvicorn", "fastapi_app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Expose port 8000
+EXPOSE 8000
+
+# Use a shell form to execute multiple commands with a health check loop for Ollama server
+CMD /bin/bash -c "/app/ollama_server.sh && uvicorn fastapi_app:app --host 0.0.0.0 --port 8000"
